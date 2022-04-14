@@ -18,8 +18,6 @@ public class minotaur extends Thread{
 	static int numGuests = 500001;
 	static AtomicInteger addIndex = new AtomicInteger(0);
 	static AtomicInteger removeIndex = new AtomicInteger(0);
-	
-	int loopy = 0;
 	static List<Integer> a = IntStream.range(1, numGuests + 1).boxed().collect(Collectors.toList());
 
 	// Task1 is responsible for grabbing a present from the unsorted bag, and placing it in its correct position
