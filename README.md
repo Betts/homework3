@@ -22,7 +22,9 @@ There are three Tasks that any of the servants may choose to work on at any time
   
  Task 2: A servant will simulate removing a present a sending a thank you card to the gifter. This is handled similarly to task1, with an atomic int that runs through every index of our list, removing each guest from it until none are left. The act of removal in the LockFreeList datastructure makes use a delete node marking, which will be the stand in for our "ty card sent" marking. Once a node is marked for deletion, consider this the act of marking it as having a thank you card send. 
 
-Task 3: 
+Task 3: At the behest of the Minotaur, a servant will check to see if a number chosen at random by the Minotaur is currently in the list. In my program I execute task 3 every 100000 addition cycles. In task 3 I generate a random number between 500000 and 1 to represent the minotaurs choice, I then store the result of a .contains execution that checks to see if this random number is in the list. The results are printed to the screen.
+
+The program utilizes an Executor Service and a fixed thread pool of 4 threads (as specified in the assignment). Threads pick up and execute tasks as they are available to do so. Solution seems to be very efficient with runtimes of 1.5 - 2.1 seconds. 
 
 ## Part 2 - Contained in the folder/package hw3b in the src folder.
 
