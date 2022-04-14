@@ -6,26 +6,47 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import hw3.LockFreeList;
 
 
 public class TempModule extends Thread {
+	private static final int INT_MIN = -25000;
+	private static final int INT_MAX = 25000;
+	static AtomicInteger addIndex = new AtomicInteger(1);
 	LockFreeList<Integer> listy = new LockFreeList<Integer>();
+	// These ints will hold the 5 max temps for the next report
+	static int maxTemp1 = INT_MIN; // Highest temp
+	static int maxTemp2 = INT_MIN;
+	static int maxTemp3 = INT_MIN;
+	static int maxTemp4 = INT_MIN;
+	static int maxTemp5 = INT_MIN;
+	// These ints will hold the 5 min temps for the next report
+	static int minTemp1 = INT_MAX; // Lowest Temp
+	static int minTemp2 = INT_MAX;
+	static int minTemp3 = INT_MAX;
+	static int minTemp4 = INT_MAX;
+	static int minTemp5 = INT_MAX;
+	//These ints will keep track of the 10 minute interval of time with the largest change
+	static int low = 1;
+	static int high = 11;
 	
-	
+	// Simulates generating our report. Could not get this to work properly after spending hours debugging :(
+	// Concurrentskiplistsets add function kept generting new sets instead of adding to an existing one, 
+	// And my LockFreeList datastructure that I adadpted form the textbook for part 1 needs more modification to work. 
+	// Sad to say I did not finish that within the time limit :( 
 	public class genReport implements Runnable {
 		
 		public void run() {
-			System.out.println("A report will live here");
+			System.out.println("Generating Report: ");
 			//TODO:
-			// Idea for implementation
-			// Loop through the list of 60 * 8 elements 10 at a time. Since the list is sorted you only need to
-			// Subtract the every 10th from the 10th element after it
-			// Starting at position 11 in the set, subtract positon - 10 from position 11. 
-			// Keep track of largest variance if (temp > highestseen) highestseen = temp
+			//
 			
+			System.out.println("Top 5 highest temps from past hour: " + maxTemp1 + " " + maxTemp2+ " " + maxTemp3+ " " + maxTemp4+ " " + maxTemp5);
+			System.out.println("Top 5 lowest temps from past hour: " + minTemp1 + " " + minTemp2+ " " + minTemp3+ " " + minTemp4+ " " + minTemp5);
+			System.out.println("The Ten Minute Interval of Greatest Change Occured between Minutes: " + low + " and " + high);
 		}
 
 	}
@@ -33,16 +54,46 @@ public class TempModule extends Thread {
 	// Have each sensor use .getandset on an atomic int in an array or linked list
 	public class sensorArray implements Runnable {
 		
-		public synchronized void run() {
+		public void run() {
 			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
+			int min = -100;
+			int max = 70;
 			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
 			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
+			int readTemp = ThreadLocalRandom.current().nextInt(min, max + 1);
 			listy.add(readTemp);
+			// This block keeps track of the 5 max temps for the upcoming report
+			if (readTemp > maxTemp1 && listy.contains(readTemp)) {
+				maxTemp5 = maxTemp4; maxTemp4 = maxTemp3; maxTemp3 = maxTemp2; maxTemp2 = maxTemp1; maxTemp1 = readTemp;
+			} else if (readTemp > maxTemp2 && listy.contains(readTemp)) {
+				maxTemp5 = maxTemp4; maxTemp4 = maxTemp3; maxTemp3 = maxTemp2; maxTemp2 = readTemp;
+			} else if (readTemp > maxTemp3 && listy.contains(readTemp)) {
+				maxTemp5 = maxTemp4; maxTemp4 = maxTemp3; maxTemp3 = readTemp;
+			} else if (readTemp > maxTemp4 && listy.contains(readTemp)) {
+				maxTemp5 = maxTemp4; maxTemp4 = readTemp;
+			} else if (readTemp > maxTemp5 && listy.contains(readTemp)) {
+				maxTemp5 = readTemp;
+			}
+
+			// This block keeps track of the top (bottom?) 5 min temps for the upcoming report
+			if (readTemp < minTemp1 && listy.contains(readTemp)) {
+				minTemp5 = minTemp4; minTemp4 = minTemp3; minTemp3 = minTemp2; minTemp2 = minTemp1; minTemp1 = readTemp;
+			} else if (readTemp < minTemp2 && listy.contains(readTemp)) {
+				minTemp5 = minTemp4; minTemp4 = minTemp3; minTemp3 = minTemp2; minTemp2 = readTemp;
+			} else if (readTemp < minTemp3 && listy.contains(readTemp)) {
+				minTemp5 = minTemp4; minTemp4 = minTemp3; minTemp3 = readTemp;
+			} else if (readTemp < minTemp4 && listy.contains(readTemp)) {
+				minTemp5 = minTemp4; minTemp4 = readTemp;
+			} else if (readTemp < minTemp5 && listy.contains(readTemp)) {
+				minTemp5 = readTemp;
+			}
+			// This block will keep track of the 10 minute interval of greatest change
+				//TODO:
+				// Keep track of whichever temp was added 9 cycles ago, and subtract it from the newest readTemp
+				// Update values as needed and include in report
+			
+			// Uncomment to see temps added in real time
+			//System.out.println("Temperature = " + readTemp);
 			
 		}
 
@@ -54,16 +105,10 @@ public class TempModule extends Thread {
 		ConcurrentSkipListSet<Integer>
         set = new ConcurrentSkipListSet<Integer>();
 		//Configure how many hours you would like to run the module for with this variable
-		int hours = 2;
-		// TODO: 
-		// Use java concurrentskiplistset as our datastructure since it is perfect for this application
+		int hours = 1;
 		// Every minute a new number is randomly generated between -100F and 70F
 		// Every hour a report is generated that shows the top 5 values from the last hour, the bottom 5 temps, 
 		// And the 10-minute interval of time that had the largest temp difference 
-		
-		// How to do this? 
-		// Every 10 minutes a new set is made, every 60 minutes these sets are combined into an hourset and the top and bottom 5 values are displayed
-		// 
 		
 		// Creating our threadpool of 8 Threads. 
 		final ExecutorService service = Executors.newFixedThreadPool(8);
@@ -81,6 +126,7 @@ public class TempModule extends Thread {
 			service.submit(new TempModule().new sensorArray());
 			service.submit(new TempModule().new sensorArray());
 			service.submit(new TempModule().new sensorArray());
+			addIndex.getAndIncrement();
 			service.submit(new TempModule());
 			if (k % 60 == 0) {
 				service.submit(new TempModule().new genReport());
