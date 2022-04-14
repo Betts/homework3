@@ -26,7 +26,9 @@ Task 3: At the behest of the Minotaur, a servant will check to see if a number c
 
 The LockFreeList datastructures guarantees progress. Due to the "marking" nature of removal in the LockFreeList datastructure, If there is contention among threads in during execution of a method (like add() or remove()), the threads will restart their traversal of the datastructure rather than deadlock, starve etc... 
 
-The program utilizes an Executor Service and a fixed thread pool of 4 threads (as specified in the assignment). Threads pick up and execute tasks as they are available to do so. The Solution seems to be very efficient with runtimes of 1.5 - 2.1 seconds. 
+The program utilizes an Executor Service and a fixed thread pool of 4 threads (as specified in the assignment). Threads pick up and execute tasks as they are available to do so. The Solution seems to be very efficient with runtimes of 1.5 - 2.1 seconds. I've been told the max allowable runtime for this part is 30 seconds, and I seem to be very well under that.
+
+I was able to verify that the program ran correctly by toggling on the print statements in Task1 and Task2. 500,000 total numbers were added, and removed, and you can verify that each number 1-500,000 is present within the list.
 
 ## Part 2 - Contained in the folder/package hw3b in the src folder.
 
