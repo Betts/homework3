@@ -8,13 +8,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class TempModule extends Thread{
-	ConcurrentSkipListSet<Integer> set = new ConcurrentSkipListSet<Integer>();
+import hw3.LockFreeList;
+
+
+public class TempModule extends Thread {
+	LockFreeList<Integer> listy = new LockFreeList<Integer>();
 	
 	
-	public class genReport extends Thread {
+	public class genReport implements Runnable {
 		
-		@Override
 		public void run() {
 			System.out.println("A report will live here");
 			//TODO:
@@ -24,13 +26,13 @@ public class TempModule extends Thread{
 			// Starting at position 11 in the set, subtract positon - 10 from position 11. 
 			// Keep track of largest variance if (temp > highestseen) highestseen = temp
 			
-			System.out.println(set);
 		}
 
 	}
 	
-	public class sensor1 extends Thread {
-		@Override
+	// Have each sensor use .getandset on an atomic int in an array or linked list
+	public class sensorArray implements Runnable {
+		
 		public synchronized void run() {
 			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
 			Random rand = new Random();
@@ -40,130 +42,13 @@ public class TempModule extends Thread{
 			// every 1min
 			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
 			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			System.out.println("set = "+set);
+			listy.add(readTemp);
 			
 		}
 
 	}	
 	
-	public class sensor2 extends Thread {
-		@Override
-		public synchronized void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			
-		}
 
-	}
-	
-	public class sensor3 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			
-		}
-
-	}
-	
-	public class sensor4 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			
-		}
-
-	}
-	
-	public class sensor5 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			
-		}
-
-	}
-	
-	public class sensor6 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-			
-		}
-
-	}
-
-	
-	public class sensor7 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-		}
-
-	}
-	
-	public class sensor8 extends Thread {
-		@Override
-		public void run() {
-			// We assume the report was generated after 1 minute, so we do not have to actually wait out the time (I believe?)
-			Random rand = new Random();
-			int upperbound = 70;
-			int lowerbound = -100;
-			// The variable readTemp is a randomly generated value between -100 and 70, this represents the sensor readings we obtain
-			// every 1min
-			int readTemp = rand.nextInt(upperbound - lowerbound) + lowerbound;
-			//System.out.println("Temperature = " + readTemp);
-			set.add(readTemp);
-		}
-
-	}
 	
 	public static void main(String[] args) {
 		ConcurrentSkipListSet<Integer>
@@ -184,18 +69,21 @@ public class TempModule extends Thread{
 		final ExecutorService service = Executors.newFixedThreadPool(8);
 		
 		Instant start = Instant.now();
+		
 		for ( int k = 1; k <= (hours * 60); k++)
 		{
-			service.execute(new TempModule().new sensor1());
-			service.execute(new TempModule().new sensor2());
-			service.execute(new TempModule().new sensor3());
-			service.execute(new TempModule().new sensor4());
-			service.execute(new TempModule().new sensor5());
-			service.execute(new TempModule().new sensor6());
-			service.execute(new TempModule().new sensor7());
-			service.execute(new TempModule().new sensor8());
+			// 8 Instances of SensorArray for every call simulate there being 8 sensors
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule().new sensorArray());
+			service.submit(new TempModule());
 			if (k % 60 == 0) {
-				service.execute(new TempModule().new genReport());
+				service.submit(new TempModule().new genReport());
 			}
 			
 		}
@@ -207,7 +95,5 @@ public class TempModule extends Thread{
 		double runtimes = (double) runtime / 1000;
 		System.out.println("All tasks completed in: " + runtimes + " seconds");		
 
-	}
-	
-	
+	}	
 }
