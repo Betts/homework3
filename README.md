@@ -28,4 +28,8 @@ The program utilizes an Executor Service and a fixed thread pool of 4 threads (a
 
 ## Part 2 - Contained in the folder/package hw3b in the src folder.
 
-I utilized the same LockFreeList that I used in part 1 to design my Temperature Module. I had planned to use a concurrentskiplistset, but it did not work properly, and ended up burning a lot of time. I have a for loop in my main method that executes 60 times for every 
+I utilized the same LockFreeList that I used in part 1 to design my Temperature Module. I had planned to use a concurrentskiplistset, but it did not work properly, and ended up burning a lot of time. I have a for loop in my main method that executes 60 times for every 1 hour of runtime. You can adjust how many hours the program executes by changing the hour variable in main (by default this is set to 1). Within this for loop 'service.submit(new TempModule().new sensorArray());' is executed 8 times, with each execution representing one of our 8 total sensors that make up the array. Also within the for loop is an if statement that checks if the current index is divisible by 60, or if an hour has elapsed. If an hour has elapsed, then we generate a report.
+
+During each execution of our SensorArray method, we perform checks and keep track of the top 5 highest values seen and top 5 lowest values seen. We do this by utlizing comparison statements and global ints. See Commenting in the program. 
+
+The program utilizes an Executor Service and a fixed thread pool of 8 threads (as specified in the assignment). Threads pick up and execute tasks as they are available to do so. Solution seems to be very efficient with runtimes around .008 - .012 seconds. This solution also ensures that the act of generating the report does not delay or hinder the act of taking readings every minute.
